@@ -51,6 +51,7 @@ type Case struct {
     Body        string
     Page        string // a path only
     ReplyWanted bool
+    Shared      bool // visible in full to the requester's organization administrators
     Requester   Requester
     CreatedAt   time.Time
 }
@@ -126,6 +127,25 @@ func (s *Service) Submit(ctx context.Context, r Request) (Receipt, error)
 - `Submit` writes the case and an outbox entry in one transaction and returns
   a `Receipt`, which holds the reference. Nothing is sent before the commit.
 
+### Organization view
+
+```go
+func (s *Service) OrganizationIndex(ctx context.Context, org string, page Page) ([]IndexEntry, error)
+func (s *Service) OrganizationCase(ctx context.Context, org, ref string) (Case, error)
+```
+
+- **The index** carries the reference, requester principal, kind, product,
+  status and times, and never the title, body or reply address.
+- **The full case** is returned only when the case is shared, or when its
+  kind is `billing`. Otherwise it returns `ErrNotShared`.
+- **`Shared` is set at intake.** It comes from the requester's choice, from a
+  `SharingPolicy` port (the host's organization setting), or from the kind
+  `billing`, and is stored so the rule that applied can be shown later. A
+  requester may unshare their own request, but not a billing one.
+- **Authorization is the host's.** supportforge does not decide who is an
+  organization administrator; the host calls these methods only for owners
+  and admins.
+
 ### Outbox and worker
 
 - The outbox holds references only: `kind` (`support.deliver`), the case
@@ -177,7 +197,7 @@ model:
 | `id`, `reference` | internal | | retain | with the row |
 | `principal_id` | internal | pii | tombstone | with the row |
 | `organization_id` | internal | | retain | with the row |
-| `product`, `kind`, `status`, `reply_wanted` | public | | retain | with the row |
+| `product`, `kind`, `status`, `reply_wanted`, `shared` | public | | retain | with the row |
 | `page` | internal | | retain | with the row |
 | `title`, `body` | public | pii | clear | cleared after delivery plus the clear delay |
 | `reply_to` | public | pii | clear | same |

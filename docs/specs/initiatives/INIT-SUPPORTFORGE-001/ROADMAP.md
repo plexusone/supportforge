@@ -8,8 +8,7 @@ stable IDs (`RMI-SUPPORTFORGE-NNN`), are reviewed and executed by phase, and
 commits implementing one carry the trailer `Refs: RMI-SUPPORTFORGE-<NNN>`.
 Items marked `supportforge-core` are implemented in that repository.
 
-Later, not scheduled: a requester's list of their own cases, organization
-administrators' view of their organization's cases, suggested answers before
+Later, not scheduled: a requester's list of their own cases, suggested answers before
 submitting from a knowledge module, an agent console, and a live channel.
 
 ## Phase 1 — Core interface
@@ -53,6 +52,8 @@ submitting from a knowledge module, an agent console, and a live channel.
   - Depends on: `RMI-SUPPORTFORGE-010`
 - [ ] `RMI-SUPPORTFORGE-014` Log and error redaction tests: no title, body, address or ticket content anywhere
   - Depends on: `RMI-SUPPORTFORGE-007`
+- [ ] `RMI-SUPPORTFORGE-018` Organization view: the `Shared` flag, the `SharingPolicy` port, billing requests shared, the text-free index, and unsharing
+  - Depends on: `RMI-SUPPORTFORGE-006`, `RMI-SUPPORTFORGE-010`
 
 ## Phase 4 — Release
 

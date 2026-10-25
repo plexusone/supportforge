@@ -65,6 +65,7 @@ building many applications meet the same gaps each time:
 | Visitor | Contact the team from a public page without an account |
 | Support responder | Every request in one inbox, with who sent it, which product and page, and what kind |
 | Application developer | One call to accept a request, one place to choose the help desk, nothing vendor-specific in product code |
+| Organization administrator | Know which support requests their organization has open, and read the ones that are about the organization, such as billing, or that a member chose to share |
 | Privacy or legal manager | Requests included in data export and erasure, kept no longer than needed, and preserved under a legal hold |
 
 ## Requirements
@@ -80,6 +81,18 @@ building many applications meet the same gaps each time:
 - Size limits and per-requester rate limits apply.
 - The response is a case reference and the promise of an email reply, with
   no time given.
+- A signed-in requester may share a request with their organization's
+  administrators. Sharing is off by default, except where the organization's
+  policy shares every request or the kind is `billing`, and the form says
+  which applies before anyone types.
+
+### Organization view
+
+- An organization's administrators can list its requests as an index: who
+  filed, kind, product, status and dates, with no text.
+- They can read the text of shared requests and of billing requests, until it
+  is cleared.
+- Members and collaborators see no one else's requests.
 
 ### Delivery
 
@@ -127,7 +140,6 @@ building many applications meet the same gaps each time:
 
 ## Open questions
 
-- Should organization administrators see their own organization's cases?
 - Should a requester be able to list their own cases in the application, or
   only follow them by email?
 - How long should the index be kept? This is a product policy, so the default
