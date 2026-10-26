@@ -108,9 +108,9 @@ building many applications meet the same gaps each time:
 
 ### Data
 
-- Message text, title and reply address are cleared a configurable time after
+- Message body and reply address are cleared a configurable time after
   delivery (seven days by default). What remains is an index: references,
-  kind, product, status and times.
+  title, kind, product, status and times.
 - Export returns a requester's cases, and, where the desk supports it, the
   conversation from the desk.
 - Erasure clears the requester's cases and asks the desk to delete its
@@ -133,14 +133,21 @@ building many applications meet the same gaps each time:
   conformance suite and is selected by configuration alone.
 - With the desk returning errors for an hour, no request is lost, and each is
   delivered when the desk returns or through the mailbox.
-- A request's text and reply address are gone from storage seven days after
+- A request's body and reply address are gone from storage seven days after
   delivery, and an export and an erasure for a test requester include its
   cases.
 - A visitor's acknowledgment never contains the text they submitted.
 
+### Requester's list
+
+- A signed-in requester can list their own requests: reference, kind,
+  product, title, date and status, with a link to the desk where the desk has
+  a page they can sign in to.
+- The title is kept while the request is listed, so the requester can
+  recognize it. The body and reply address are cleared as above.
+- Visitors have no list; they follow their request by email.
+
 ## Open questions
 
-- Should a requester be able to list their own cases in the application, or
-  only follow them by email?
 - How long should the index be kept? This is a product policy, so the default
   needs a number the platform's retention rules can use.

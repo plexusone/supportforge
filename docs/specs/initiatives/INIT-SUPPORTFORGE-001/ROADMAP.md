@@ -20,6 +20,8 @@ submitting from a knowledge module, an agent console, and a live channel.
   - Depends on: `RMI-SUPPORTFORGE-001`
 - [x] `RMI-SUPPORTFORGE-003` `supportforge-core`: the `desktest` conformance suite and an in-memory desk that passes it
   - Depends on: `RMI-SUPPORTFORGE-002`
+- [ ] `RMI-SUPPORTFORGE-019` `supportforge-core`: the `TicketLinker` and `TicketStatuser` extensions, with conformance checks
+  - Depends on: `RMI-SUPPORTFORGE-003`
 - [ ] `RMI-SUPPORTFORGE-004` One vendor adapter, written outside this repository, passes the suite before `supportforge-core` v1
   - Depends on: `RMI-SUPPORTFORGE-003`
 
@@ -37,6 +39,8 @@ submitting from a knowledge module, an agent console, and a live channel.
   - Depends on: `RMI-SUPPORTFORGE-005`
 - [ ] `RMI-SUPPORTFORGE-009` The mailbox desk on `omnimail`, passing the desk conformance suite
   - Depends on: `RMI-SUPPORTFORGE-003`, `RMI-SUPPORTFORGE-008`
+- [ ] `RMI-SUPPORTFORGE-020` The requester's list, the status job and the stored desk link
+  - Depends on: `RMI-SUPPORTFORGE-006`, `RMI-SUPPORTFORGE-019`
 
 ## Phase 3 — Data governance
 

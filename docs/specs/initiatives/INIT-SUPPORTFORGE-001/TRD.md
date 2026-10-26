@@ -107,6 +107,22 @@ type TicketExporter interface {
   - vendor failures and a canceled context are classified;
   - erasure, when offered, removes the ticket and can be repeated;
   - export, when offered, returns the conversation.
+- **Requester-facing extensions,** also optional and discovered by type
+  assertion:
+
+  ```go
+  type TicketLinker interface {
+      // TicketURL returns a page the requester can sign in to, or "" if none.
+      TicketURL(ctx context.Context, d Delivery) (string, error)
+  }
+  type TicketStatuser interface {
+      TicketStatus(ctx context.Context, d Delivery) (Status, error) // open, pending or closed
+  }
+  ```
+
+  The suite checks them where implemented. A desk without `TicketLinker`
+  gives no link; one without `TicketStatuser` leaves the status at
+  `delivered`.
 - **In-memory desk.** `memdesk` passes the suite and is the desk the host's
   own tests use.
 - **Stability.** The module is versioned on its own and changes rarely. A
@@ -157,6 +173,21 @@ func (s *Service) OrganizationCase(ctx context.Context, org, ref string) (Case, 
 - **Authorization is the host's.** supportforge does not decide who is an
   organization administrator; the host calls these methods only for owners
   and admins.
+
+### Requester's list
+
+```go
+func (s *Service) RequesterCases(ctx context.Context, principal string, page Page) ([]ListEntry, error)
+```
+
+- Returns the principal's cases with reference, kind, product, title,
+  status, times and the desk link.
+- **Status** is `received` before delivery and `delivered` after. A status
+  job asks desks that implement `TicketStatuser` for `open`, `pending` or
+  `closed`, at a bounded rate, and stores the answer; the list never calls a
+  desk.
+- **The desk link** is fetched once after delivery from a `TicketLinker` and
+  stored.
 
 ### Outbox and worker
 
@@ -211,9 +242,10 @@ model:
 | `organization_id` | internal | | retain | with the row |
 | `product`, `kind`, `status`, `reply_wanted`, `shared` | public | | retain | with the row |
 | `page` | internal | | retain | with the row |
-| `title`, `body` | public | pii | clear | cleared after delivery plus the clear delay |
+| `title` | public | pii | clear | with the row; cleared on erasure |
+| `body` | public | pii | clear | cleared after delivery plus the clear delay |
 | `reply_to` | public | pii | clear | same |
-| `desk`, `ticket_id` | internal | | retain | with the row |
+| `desk`, `ticket_id`, `desk_url` | internal | | retain | with the row |
 | `created_at`, `delivered_at`, `cleared_at` | internal | | retain | with the row |
 
 The entity's subject key is `principal_id`. Rows are purged after the index
@@ -228,8 +260,9 @@ message text. Clearing then deletes the ciphertext.
 
 ### Retention, export and erasure
 
-- **Clear job.** Clears `title`, `body` and `reply_to` on delivered cases
-  older than the clear delay (default seven days). Undelivered cases are never
+- **Clear job.** Clears `body` and `reply_to` on delivered cases older than
+  the clear delay (default seven days). The title stays with the row so the
+  requester's list can show it. Undelivered cases are never
   cleared.
 - **Holds.** A `HoldChecker` port is consulted before clearing and erasing. A
   held subject's cases are skipped and reported.
