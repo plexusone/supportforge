@@ -15,10 +15,10 @@ submitting from a knowledge module, an agent console, and a live channel.
 
 **Theme:** Any help desk can be connected through one small, stable interface, and an adapter can prove it behaves.
 
-- [ ] `RMI-SUPPORTFORGE-001` `supportforge-core`: module, CI, and the `Case`, `Requester`, `Acknowledgment`, `Context` and `Delivery` types
-- [ ] `RMI-SUPPORTFORGE-002` `supportforge-core`: the `Desk` interface, the `TicketEraser` and `TicketExporter` extensions, and the error classes
+- [x] `RMI-SUPPORTFORGE-001` `supportforge-core`: module, CI, and the `Case`, `Requester`, `Acknowledgment`, `Context` and `Delivery` types
+- [x] `RMI-SUPPORTFORGE-002` `supportforge-core`: the `Desk` interface, the `TicketEraser` and `TicketExporter` extensions, and the error classes
   - Depends on: `RMI-SUPPORTFORGE-001`
-- [ ] `RMI-SUPPORTFORGE-003` `supportforge-core`: the `desktest` conformance suite and an in-memory desk that passes it
+- [x] `RMI-SUPPORTFORGE-003` `supportforge-core`: the `desktest` conformance suite and an in-memory desk that passes it
   - Depends on: `RMI-SUPPORTFORGE-002`
 - [ ] `RMI-SUPPORTFORGE-004` One vendor adapter, written outside this repository, passes the suite before `supportforge-core` v1
   - Depends on: `RMI-SUPPORTFORGE-003`

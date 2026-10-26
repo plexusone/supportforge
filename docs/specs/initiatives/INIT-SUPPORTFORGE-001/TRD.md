@@ -85,18 +85,30 @@ type TicketExporter interface {
 }
 ```
 
+- **Transcript.** `ExportTicket` returns a `Transcript`: the `Delivery` and
+  its messages, each with an author (`requester`, `responder` or `note`), a
+  body and a time.
 - **Error classes.** A desk returns errors wrapping `ErrRetryable` (try
-  again later, with an optional retry-after time), `ErrCredential` (stop
-  and alert), `ErrRejected` (this case cannot be delivered here; move to the
-  next desk) or `ErrUnsupported`.
-- **Conformance suite.** `supportcore/desktest` runs any `Desk` against a
-  test double of its vendor and checks:
-  - delivery returns a ticket ID;
-  - the acknowledgment is the one given;
-  - a visitor's body never appears in what is sent to the requester;
-  - context never reaches the requester;
-  - errors are classified;
-  - erasure, when offered, removes the ticket.
+  again later; `Retry(err, after)` carries a vendor's retry-after),
+  `ErrCredential` (stop and alert), `ErrRejected` (this case cannot be
+  delivered here; move to the next desk) or `ErrUnsupported`. `Classify`
+  returns an error's class for the worker.
+- **No leaks through formatting.** `Case` and `Requester` format and log
+  without the title, body or reply address.
+- **Conformance suite.** `desktest.Run` runs any `Desk` against a test double
+  of its vendor, which reports what was sent to the requester and what
+  responders see, and simulates vendor failures. It checks:
+  - delivery returns this desk's name and a distinct ticket ID;
+  - the requester is sent the acknowledgment given;
+  - the requester is sent nothing else: not the title, body or context, for
+    a visitor or a signed-in requester;
+  - responders see the title, body and context;
+  - with no reply address, nothing is sent, or the case is rejected;
+  - vendor failures and a canceled context are classified;
+  - erasure, when offered, removes the ticket and can be repeated;
+  - export, when offered, returns the conversation.
+- **In-memory desk.** `memdesk` passes the suite and is the desk the host's
+  own tests use.
 - **Stability.** The module is versioned on its own and changes rarely. A
   breaking change is a new major version.
 
