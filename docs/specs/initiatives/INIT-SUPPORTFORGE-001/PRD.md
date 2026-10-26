@@ -108,9 +108,15 @@ building many applications meet the same gaps each time:
 
 ### Data
 
-- Message body and reply address are cleared a configurable time after
-  delivery (seven days by default). What remains is an index: references,
-  title, kind, product, status and times.
+- The message body is cleared a configurable time after delivery (seven
+  days by default).
+- The reply address is kept while the conversation may continue, and cleared
+  the same time after it goes quiet: after delivery, the last reply, or the
+  desk closing the ticket, whichever is latest. A ceiling (90 days without
+  activity by default) clears it even if the desk still shows the ticket
+  open.
+- What remains is an index: references, title, kind, product, status and
+  times.
 - Export returns a requester's cases, and, where the desk supports it, the
   conversation from the desk.
 - Erasure clears the requester's cases and asks the desk to delete its
@@ -133,8 +139,8 @@ building many applications meet the same gaps each time:
   conformance suite and is selected by configuration alone.
 - With the desk returning errors for an hour, no request is lost, and each is
   delivered when the desk returns or through the mailbox.
-- A request's body and reply address are gone from storage seven days after
-  delivery, and an export and an erasure for a test requester include its
+- A request's body is gone from storage seven days after delivery, its
+  reply address seven days after the ticket closes, and an export and an erasure for a test requester include its
   cases.
 - A visitor's acknowledgment never contains the text they submitted.
 

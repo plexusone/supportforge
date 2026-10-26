@@ -214,9 +214,9 @@ func (s *Service) ApproveReply(ctx context.Context, draftID, approver string, ve
   and the draft is marked for a person to send at the desk.
 - The draft's text is cleared once it is sent or discarded. The record of
   author, approver and times stays with the case.
-- **The mail desk** replies to the case's reply address, so it can reply only
-  until that is cleared. Afterwards, the reply goes out from the operator's
-  mailbox.
+- **The mail desk** replies to the case's reply address. Each reply resets
+  the clock on that address, so it is kept while the conversation continues.
+  Once it is cleared, a later reply goes out from the operator's mailbox.
 
 ### Outbox and worker
 
@@ -273,9 +273,9 @@ model:
 | `page` | internal | | retain | with the row |
 | `title` | public | pii | clear | with the row; cleared on erasure |
 | `body` | public | pii | clear | cleared after delivery plus the clear delay |
-| `reply_to` | public | pii | clear | same |
+| `reply_to` | public | pii | clear | cleared once the conversation is quiet: see the clear job |
 | `desk`, `ticket_id`, `desk_url` | internal | | retain | with the row |
-| `created_at`, `delivered_at`, `cleared_at` | internal | | retain | with the row |
+| `created_at`, `delivered_at`, `last_reply_at`, `closed_at`, `cleared_at` | internal | | retain | with the row |
 
 The entity's subject key is `principal_id`. Rows are purged after the index
 retention, which is the host's policy input. A visitor's row has no subject
@@ -289,10 +289,18 @@ message text. Clearing then deletes the ciphertext.
 
 ### Retention, export and erasure
 
-- **Clear job.** Clears `body` and `reply_to` on delivered cases older than
-  the clear delay (default seven days). The title stays with the row so the
-  requester's list can show it. Undelivered cases are never
-  cleared.
+- **Clear job.** Runs on delivered cases only; undelivered cases are never
+  cleared. The clear delay defaults to seven days.
+  - **`body`** is cleared the clear delay after delivery.
+  - **`reply_to`** is kept while the conversation may continue, and cleared
+    the clear delay after the latest of:
+    - delivery;
+    - the last reply sent through supportforge (`last_reply_at`);
+    - closure, for a desk that reports status (`closed_at`). While such a
+      desk reports the ticket open, the address is kept.
+  - **A ceiling** clears `reply_to` once the case has had no activity for the
+    maximum hold (default 90 days), even if the desk still reports it open.
+  - **`title`** stays with the row so the requester's list can show it.
 - **Holds.** A `HoldChecker` port is consulted before clearing and erasing. A
   held subject's cases are skipped and reported.
 - **Export.** `Export(subject)` returns the subject's cases, plus each
