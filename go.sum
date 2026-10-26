@@ -1,2 +1,4 @@
 github.com/plexusone/omnimail v0.1.0 h1:bn52OyI74DKD5M8HnKbin4VWNIL900pjfUCypv7lep4=
 github.com/plexusone/omnimail v0.1.0/go.mod h1:twUkwsmlWGTwEaBEwN1jYnyZCn+feAzKfbhCmw3v8H4=
+github.com/plexusone/supportforge-core v0.1.0 h1:QR82WujS2qssKIRcllChxpS8JtCGFRZvyPag6DNIndk=
+github.com/plexusone/supportforge-core v0.1.0/go.mod h1:qOpE5oz0+rSmkst5cTTH5rhl+pSd9HPpiB2Tbvqokdc=
