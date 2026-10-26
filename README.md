@@ -4,8 +4,10 @@ Support requests and feedback for Go applications: accept a request from a
 signed-in user or a visitor, store it before anything is sent, and deliver it
 to a help desk or a mailbox, with personal-data rules built in.
 
-> **Status:** specified, not yet implemented. See the
-> [specifications](docs/specs/initiatives/INIT-SUPPORTFORGE-001/PRD.md).
+> **Status:** in development. Intake, the in-memory store, delivery with
+> retries across desks, acknowledgments, the mail desk and the requester's
+> list are built; data governance and the PostgreSQL store come next. See
+> the [specifications](docs/specs/initiatives/INIT-SUPPORTFORGE-001/PRD.md).
 
 ## What it does
 

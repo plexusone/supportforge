@@ -124,7 +124,7 @@ type TicketExporter interface {
 
   ```go
   type TicketReplier interface {
-      Reply(ctx context.Context, d Delivery, body string) error
+      Reply(ctx context.Context, d Delivery, c Case, body string) error
   }
   ```
 
@@ -157,9 +157,14 @@ func (s *Service) Submit(ctx context.Context, r Request) (Receipt, error)
     reply wanted.
 - Ports the host implements:
   - `ChallengeVerifier`, for visitors;
-  - `RateLimiter`, keyed by principal, or by challenge token for visitors;
-  - `Observer`, which receives a `case_created` notice with kind and
-    product, and no text.
+  - `RateLimiter`, keyed by principal, or for visitors by a key the host
+    supplies, such as a hashed client address;
+  - `SharingPolicy`, the organization's setting;
+  - `ContextSource`, which adds to what responders see at delivery and is
+    not stored;
+  - `Observer`, which receives events (`case_created`, `delivered`,
+    `delivery_failed`, `credential_failed`, `desk_failed`) carrying IDs,
+    kind, product, desk and error class, and no text.
 - `Submit` writes the case and an outbox entry in one transaction and returns
   a `Receipt`, which holds the reference. Nothing is sent before the commit.
 
@@ -223,8 +228,9 @@ func (s *Service) ApproveReply(ctx context.Context, draftID, approver string, ve
 - The outbox holds references only: `kind` (`support.deliver`), the case
   ID, attempts, the next attempt time, and the last error class. It holds no
   personal data, so it needs no erasure rules.
-- The worker claims due entries with `FOR UPDATE SKIP LOCKED`, so several
-  processes can run it.
+- `Deliver` makes one pass and `Run` repeats it on an interval. The worker
+  claims due entries with a lease (in SQL, `FOR UPDATE SKIP LOCKED`), so
+  several processes can run it; an attempt gets half the lease.
 - Backoff is exponential with jitter, capped at one hour.
 - **The desk order is configured, for example `vendor, mailbox`.**
   - `ErrRetryable` retries the same desk until the attempt limit, then
