@@ -22,7 +22,7 @@ submitting from a knowledge module, an agent console, and a live channel.
   - Depends on: `RMI-SUPPORTFORGE-002`
 - [x] `RMI-SUPPORTFORGE-019` `supportforge-core`: the `TicketLinker`, `TicketStatuser` and `TicketReplier` extensions, with conformance checks
   - Depends on: `RMI-SUPPORTFORGE-003`
-- [ ] `RMI-SUPPORTFORGE-004` One vendor adapter, written outside this repository, passes the suite before `supportforge-core` v1
+- [x] `RMI-SUPPORTFORGE-004` One vendor adapter, written outside this repository, passes the suite before `supportforge-core` v1
   - Depends on: `RMI-SUPPORTFORGE-003`
 
 ## Phase 2 — Intake and delivery
