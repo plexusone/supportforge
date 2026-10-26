@@ -120,6 +120,14 @@ type TicketExporter interface {
   }
   ```
 
+  A third, `TicketReplier`, sends a reply into the ticket's conversation:
+
+  ```go
+  type TicketReplier interface {
+      Reply(ctx context.Context, d Delivery, body string) error
+  }
+  ```
+
   The suite checks them where implemented. A desk without `TicketLinker`
   gives no link; one without `TicketStatuser` leaves the status at
   `delivered`.
@@ -188,6 +196,27 @@ func (s *Service) RequesterCases(ctx context.Context, principal string, page Pag
   desk.
 - **The desk link** is fetched once after delivery from a `TicketLinker` and
   stored.
+
+### Drafted replies
+
+```go
+func (s *Service) DraftReply(ctx context.Context, ref, author, body string) (Draft, error)
+func (s *Service) ApproveReply(ctx context.Context, draftID, approver string, version int) error
+```
+
+- A draft holds the case, its author, the text and a version that changes
+  with every edit. Its text is classified like the case's body.
+- **Approval names the version,** so an edit after approval needs a new
+  one. The approver must differ from the author. Whether the approver may
+  approve is the host's decision; supportforge only records it.
+- **Approval queues the send** through the outbox, which calls the desk's
+  `TicketReplier`. A desk without one gets the draft as a note where it can,
+  and the draft is marked for a person to send at the desk.
+- The draft's text is cleared once it is sent or discarded. The record of
+  author, approver and times stays with the case.
+- **The mail desk** replies to the case's reply address, so it can reply only
+  until that is cleared. Afterwards, the reply goes out from the operator's
+  mailbox.
 
 ### Outbox and worker
 

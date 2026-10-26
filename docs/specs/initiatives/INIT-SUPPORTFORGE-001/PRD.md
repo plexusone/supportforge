@@ -147,6 +147,14 @@ building many applications meet the same gaps each time:
   recognize it. The body and reply address are cleared as above.
 - Visitors have no list; they follow their request by email.
 
+### Drafted replies
+
+- A responder, or an agent acting for one, can draft a reply to a request.
+- A draft is sent only after a person other than its author approves that
+  exact text, and it goes through the desk so it joins the conversation.
+- Who drafted, who approved and when it was sent are recorded; the draft's
+  text is cleared once sent or discarded.
+
 ## Open questions
 
 - How long should the index be kept? This is a product policy, so the default

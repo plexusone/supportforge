@@ -20,7 +20,7 @@ submitting from a knowledge module, an agent console, and a live channel.
   - Depends on: `RMI-SUPPORTFORGE-001`
 - [x] `RMI-SUPPORTFORGE-003` `supportforge-core`: the `desktest` conformance suite and an in-memory desk that passes it
   - Depends on: `RMI-SUPPORTFORGE-002`
-- [ ] `RMI-SUPPORTFORGE-019` `supportforge-core`: the `TicketLinker` and `TicketStatuser` extensions, with conformance checks
+- [ ] `RMI-SUPPORTFORGE-019` `supportforge-core`: the `TicketLinker`, `TicketStatuser` and `TicketReplier` extensions, with conformance checks
   - Depends on: `RMI-SUPPORTFORGE-003`
 - [ ] `RMI-SUPPORTFORGE-004` One vendor adapter, written outside this repository, passes the suite before `supportforge-core` v1
   - Depends on: `RMI-SUPPORTFORGE-003`
@@ -41,6 +41,8 @@ submitting from a knowledge module, an agent console, and a live channel.
   - Depends on: `RMI-SUPPORTFORGE-003`, `RMI-SUPPORTFORGE-008`
 - [ ] `RMI-SUPPORTFORGE-020` The requester's list, the status job and the stored desk link
   - Depends on: `RMI-SUPPORTFORGE-006`, `RMI-SUPPORTFORGE-019`
+- [ ] `RMI-SUPPORTFORGE-021` Drafted replies: versioned drafts, approval by a different principal, sending through the outbox, and clearing
+  - Depends on: `RMI-SUPPORTFORGE-007`, `RMI-SUPPORTFORGE-019`
 
 ## Phase 3 — Data governance
 
