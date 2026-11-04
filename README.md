@@ -4,9 +4,9 @@ Support requests and feedback for Go applications: accept a request from a
 signed-in user or a visitor, store it before anything is sent, and deliver it
 to a help desk or a mailbox, with personal-data rules built in.
 
-> **Status:** in development. Intake, the in-memory store, delivery with
-> retries across desks, acknowledgments, the mail desk and the requester's
-> list are built; data governance and the PostgreSQL store come next. See
+> **Status:** in development. Intake, the in-memory and SQL stores, delivery
+> with retries across desks, acknowledgments, the mail desk and the
+> requester's list are built; data governance comes next. See
 > the [specifications](docs/specs/initiatives/INIT-SUPPORTFORGE-001/PRD.md).
 
 ## What it does
@@ -31,6 +31,43 @@ to a help desk or a mailbox, with personal-data rules built in.
 | --- | --- |
 | `github.com/plexusone/supportforge-core` | Types, the `Desk` interface, error classes, and the desk conformance suite |
 | `github.com/plexusone/supportforge` | Intake, stores, outbox and worker, retention, export and erasure, and the mailbox desk |
+
+## Stores
+
+| Package | Use |
+| --- | --- |
+| `store/sqlstore` | Production. PostgreSQL (or SQLite for development), built with Ent, in tables named `supportforge_*` so it can share the host's database. Several processes can run the worker: a claim locks its rows with `FOR UPDATE SKIP LOCKED` |
+| `store/memstore` | Tests, and running without a database |
+
+On a shared PostgreSQL server, migrate once per deploy as the database's
+owner role, and grant the role the application connects as only what it
+needs:
+
+```go
+// Deploy step, connected as the owner.
+owner, err := sqlstore.New(ownerDB, sqlstore.Postgres)
+if err != nil {
+	return err
+}
+if err := owner.Migrate(ctx); err != nil { // creates or updates only supportforge_* tables
+	return err
+}
+if err := owner.GrantTo(ctx, "app_role"); err != nil { // SELECT, INSERT, UPDATE, DELETE
+	return err
+}
+
+// The application, connected as the app role.
+st, err := sqlstore.New(appDB, sqlstore.Postgres)
+if err != nil {
+	return err
+}
+svc, err := supportforge.New(supportforge.Config{Store: st /* , ... */})
+```
+
+Every store passes the same conformance suite, `store/storetest`. The
+PostgreSQL run needs a server: set `SUPPORTFORGE_TEST_PG_DSN` to an admin
+DSN that may create databases and roles. It runs the suite as an app role
+that owns nothing.
 
 ## License
 
