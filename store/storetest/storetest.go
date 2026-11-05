@@ -37,6 +37,7 @@ func Run(t *testing.T, newStore NewFunc) {
 		{"Delivered", checkDelivered},
 		{"ByPrincipal", checkByPrincipal},
 		{"StatusDue", checkStatusDue},
+		{"ClearDue", checkClearDue},
 	}
 	for _, c := range checks {
 		t.Run(c.name, func(t *testing.T) { c.run(t, newStore(t)) })
@@ -304,6 +305,69 @@ func checkStatusDue(t *testing.T, s store.Store) {
 	}
 	if got, err := s.StatusDue(ctx, []string{"posthog"}, 1); err != nil || len(got) != 1 {
 		t.Errorf("StatusDue with limit 1 = %v, %v", caseIDs(got), err)
+	}
+}
+
+func checkClearDue(t *testing.T, s store.Store) {
+	ctx := t.Context()
+	day := 24 * time.Hour
+	at := func(days int) time.Time { return t0.Add(time.Duration(-days) * day) }
+	// deliver stores a case delivered at the given time, then applies fn.
+	deliver := func(id string, delivered time.Time, fn func(*store.Case)) {
+		e := create(t, s, newCase(id, "p1", at(200)), t0)
+		if delivered.IsZero() {
+			return
+		}
+		if err := s.Delivered(ctx, e.ID, supportcore.Delivery{Desk: "posthog", TicketID: id}, delivered); err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Update(ctx, id, func(c *store.Case) error { fn(c); return nil }); err != nil {
+			t.Fatal(err)
+		}
+	}
+	none := func(*store.Case) {}
+	bodyCleared := func(c *store.Case) { c.Body, c.BodyClearedAt = "", at(1) }
+	status := func(st store.Status, more ...func(*store.Case)) func(*store.Case) {
+		return func(c *store.Case) {
+			c.Status = st
+			bodyCleared(c)
+			for _, f := range more {
+				f(c)
+			}
+		}
+	}
+
+	deliver("undelivered", time.Time{}, none)
+	deliver("fresh", at(6), none)
+	deliver("at-cutoff", at(7), none) // body and address both due
+	deliver("open", at(30), status(store.StatusOpen))
+	deliver("open-past-ceiling", at(100), status(store.StatusOpen))
+	deliver("closed-recently", at(30), status(store.StatusClosed, func(c *store.Case) { c.ClosedAt = at(1) }))
+	deliver("closed", at(30), status(store.StatusClosed, func(c *store.Case) { c.ClosedAt = at(8) }))
+	deliver("replied-recently", at(30), status(store.StatusDelivered, func(c *store.Case) { c.LastReplyAt = at(1) }))
+	deliver("cleared", at(30), status(store.StatusDelivered, func(c *store.Case) {
+		c.Requester.ReplyTo, c.ReplyToClearedAt = "", at(1)
+	}))
+
+	r := store.ClearRule{Body: at(7), ReplyTo: at(7), Ceiling: at(90)}
+	got, err := s.ClearDue(ctx, r, store.Page{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ids := caseIDs(got); fmt.Sprint(ids) != "[open-past-ceiling closed at-cutoff]" {
+		t.Errorf("ClearDue = %v, want delivered cases with text due, oldest delivery first", ids)
+	}
+	for _, c := range got {
+		if !r.Due(c) {
+			t.Errorf("ClearDue returned %s, which the rule says is not due", c.ID)
+		}
+	}
+	got, err = s.ClearDue(ctx, r, store.Page{Limit: 1, Offset: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ids := caseIDs(got); fmt.Sprint(ids) != "[closed]" {
+		t.Errorf("ClearDue page 2 of size 1 = %v, want [closed]", ids)
 	}
 }
 
