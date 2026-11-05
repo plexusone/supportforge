@@ -48,7 +48,7 @@ submitting from a knowledge module, an agent console, and a live channel.
 
 **Theme:** Support messages are personal data with rules: classified, kept briefly, held when required, and exportable and erasable at the desk too.
 
-- [ ] `RMI-SUPPORTFORGE-010` Field classification in the `grokify/datacatalog` model, with a test that fails on an unclassified field
+- [x] `RMI-SUPPORTFORGE-010` Field classification in the `grokify/datacatalog` model, with a test that fails on an unclassified field
   - Depends on: `RMI-SUPPORTFORGE-006`
 - [ ] `RMI-SUPPORTFORGE-011` Clear job and the `HoldChecker` port; undelivered and held cases are never cleared
   - Depends on: `RMI-SUPPORTFORGE-010`
