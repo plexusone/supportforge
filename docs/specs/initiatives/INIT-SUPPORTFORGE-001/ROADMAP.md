@@ -50,7 +50,7 @@ submitting from a knowledge module, an agent console, and a live channel.
 
 - [x] `RMI-SUPPORTFORGE-010` Field classification in the `grokify/datacatalog` model, with a test that fails on an unclassified field
   - Depends on: `RMI-SUPPORTFORGE-006`
-- [ ] `RMI-SUPPORTFORGE-011` Clear job and the `HoldChecker` port; undelivered and held cases are never cleared
+- [x] `RMI-SUPPORTFORGE-011` Clear job and the `HoldChecker` port; undelivered and held cases are never cleared
   - Depends on: `RMI-SUPPORTFORGE-010`
 - [ ] `RMI-SUPPORTFORGE-012` Export and erasure, including desk transcripts and ticket erasure, and the report of what was retained
   - Depends on: `RMI-SUPPORTFORGE-010`
