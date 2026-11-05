@@ -66,6 +66,7 @@ type Config struct {
 	Sharing   SharingPolicy     // optional
 	Context   ContextSource     // optional
 	Observer  Observer          // optional
+	Holds     HoldChecker       // optional; without it no requester is held
 
 	// MaxAttempts is how many retryable failures a desk gets before the
 	// next desk is tried. Default 5.
@@ -73,6 +74,14 @@ type Config struct {
 	// Lease is how long a worker holds an entry. A delivery attempt gets half
 	// of it. Default two minutes.
 	Lease time.Duration
+
+	// ClearDelay is how long a body is kept after delivery, and a reply
+	// address after the case's last activity. Default seven days.
+	ClearDelay time.Duration
+	// MaxHold is how long a reply address is kept without activity while
+	// the desk still reports the ticket open. Default 90 days; it may not
+	// be shorter than ClearDelay.
+	MaxHold time.Duration
 
 	Now    func() time.Time // default time.Now
 	Random io.Reader        // for IDs and references; default crypto/rand
@@ -88,8 +97,11 @@ type Service struct {
 	sharing     SharingPolicy
 	context     ContextSource
 	observer    Observer
+	holds       HoldChecker
 	maxAttempts int
 	lease       time.Duration
+	clearDelay  time.Duration
+	maxHold     time.Duration
 	now         func() time.Time
 	ids         *idSource
 }
@@ -121,8 +133,11 @@ func New(cfg Config) (*Service, error) {
 		sharing:     cfg.Sharing,
 		context:     cfg.Context,
 		observer:    cfg.Observer,
+		holds:       cfg.Holds,
 		maxAttempts: cfg.MaxAttempts,
 		lease:       cfg.Lease,
+		clearDelay:  cfg.ClearDelay,
+		maxHold:     cfg.MaxHold,
 		now:         cfg.Now,
 		ids:         newIDSource(cfg.Random),
 	}
@@ -137,6 +152,15 @@ func New(cfg Config) (*Service, error) {
 	}
 	if s.lease <= 0 {
 		s.lease = 2 * time.Minute
+	}
+	if s.clearDelay <= 0 {
+		s.clearDelay = DefaultClearDelay
+	}
+	if s.maxHold <= 0 {
+		s.maxHold = DefaultMaxHold
+	}
+	if s.maxHold < s.clearDelay {
+		return nil, fmt.Errorf("supportforge: Config.MaxHold (%s) is shorter than Config.ClearDelay (%s)", s.maxHold, s.clearDelay)
 	}
 	if s.now == nil {
 		s.now = time.Now
