@@ -69,6 +69,20 @@ PostgreSQL run needs a server: set `SUPPORTFORGE_TEST_PG_DSN` to an admin
 DSN that may create databases and roles. It runs the suite as an app role
 that owns nothing.
 
+### Data classification
+
+`sqlstore.Catalog()` classifies every column in the
+[`datacatalog`](https://github.com/grokify/datacatalog) model: who may see
+it, whether it is personal data, and what erasure does to it. Merge it with
+the host's own catalog to drive export, erasure and query guards:
+
+```go
+cat, err := datacatalog.Merge(hostCatalog, sqlstore.Catalog())
+```
+
+A test compares the catalog with the columns the store creates, so a column
+cannot ship unclassified.
+
 ## License
 
 MIT

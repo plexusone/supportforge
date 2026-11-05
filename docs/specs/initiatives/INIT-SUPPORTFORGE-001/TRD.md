@@ -275,19 +275,22 @@ model:
 | `id`, `reference` | internal | | retain | with the row |
 | `principal_id` | internal | pii | tombstone | with the row |
 | `organization_id` | internal | | retain | with the row |
-| `product`, `kind`, `status`, `reply_wanted`, `shared` | public | | retain | with the row |
+| `product`, `kind`, `status`, `reply_wanted`, `shared`, `share_reason` | public | | retain | with the row |
 | `page` | internal | | retain | with the row |
 | `title` | public | pii | clear | with the row; cleared on erasure |
 | `body` | public | pii | clear | cleared after delivery plus the clear delay |
 | `reply_to` | public | pii | clear | cleared once the conversation is quiet: see the clear job |
-| `desk`, `ticket_id`, `desk_url` | internal | | retain | with the row |
-| `created_at`, `delivered_at`, `last_reply_at`, `closed_at`, `cleared_at` | internal | | retain | with the row |
+| `delivery_desk`, `delivery_ticket_id`, `desk_url` | internal | | retain | with the row |
+| `created_at`, `delivered_at`, `last_reply_at`, `closed_at`, `status_checked_at`, `body_cleared_at`, `reply_to_cleared_at` | internal | | retain | with the row |
 
 The entity's subject key is `principal_id`. Rows are purged after the index
 retention, which is the host's policy input. A visitor's row has no subject
 key, and once cleared it no longer identifies anyone.
 
 `supportforge_outbox` holds references only, and is not in privacy scope.
+
+The classification is `sqlstore.Catalog()`. A test compares it with the
+columns Ent creates, so a column cannot ship unclassified.
 
 The `title`, `body` and `reply_to` columns can be sealed with a host-supplied
 `Cryptographer` port, under one purpose, so a database copy does not expose
