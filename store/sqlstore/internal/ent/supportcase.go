@@ -23,7 +23,7 @@ type SupportCase struct {
 	Product string `json:"product,omitempty"`
 	// Kind holds the value of the "kind" field.
 	Kind string `json:"kind,omitempty"`
-	// Personal data: cleared with the body
+	// Personal data: kept for the requester's list, cleared on erasure
 	Title string `json:"title,omitempty"`
 	// Personal data: cleared after delivery
 	Body string `json:"body,omitempty"`

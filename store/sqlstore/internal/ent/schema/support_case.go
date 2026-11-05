@@ -30,7 +30,7 @@ func (SupportCase) Fields() []ent.Field {
 		field.String("reference").NotEmpty().Immutable().Unique(),
 		field.String("product"),
 		field.String("kind"),
-		field.String("title").Comment("Personal data: cleared with the body"),
+		field.String("title").Comment("Personal data: kept for the requester's list, cleared on erasure"),
 		field.Text("body").Comment("Personal data: cleared after delivery"),
 		field.String("page"),
 		field.Bool("reply_wanted"),
