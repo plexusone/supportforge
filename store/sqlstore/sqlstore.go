@@ -78,7 +78,7 @@ func (s *Store) Migrate(ctx context.Context) error {
 }
 
 // tables are the store's tables, which [Store.GrantTo] grants on.
-var tables = []string{"supportforge_cases", "supportforge_outbox"}
+var tables = []string{CasesTable, OutboxTable}
 
 // roleName is a PostgreSQL role name the store accepts: unquoted-identifier
 // characters only, so it is safe to quote into a statement.

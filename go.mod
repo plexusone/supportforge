@@ -4,6 +4,7 @@ go 1.26.5
 
 require (
 	entgo.io/ent v0.14.6
+	github.com/grokify/datacatalog v0.1.0
 	github.com/jackc/pgx/v5 v5.12.0
 	github.com/mattn/go-sqlite3 v1.14.52
 	github.com/plexusone/omnimail v0.1.0
