@@ -66,5 +66,6 @@ func (SupportCase) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("principal_id", "created_at"),
 		index.Fields("delivery_desk", "status", "status_checked_at"),
+		index.Fields("delivered_at"), // the clear job
 	}
 }

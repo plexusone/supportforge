@@ -112,4 +112,57 @@ type Store interface {
 	// StatusDue lists delivered cases that are not closed and were delivered
 	// to one of desks, least recently checked first.
 	StatusDue(ctx context.Context, desks []string, limit int) ([]Case, error)
+
+	// ClearDue lists cases with a body or reply address due to be cleared
+	// under r, oldest delivery first.
+	ClearDue(ctx context.Context, r ClearRule, p Page) ([]Case, error)
+}
+
+// ClearRule says which personal data is due to be cleared. Each field is a
+// cutoff: a time at or before it is old enough. Only delivered cases are
+// ever due.
+type ClearRule struct {
+	// Body: a body delivered at or before this is due.
+	Body time.Time
+	// ReplyTo: a reply address is due when the case's last activity is at
+	// or before this, unless the desk reports the ticket open or pending.
+	ReplyTo time.Time
+	// Ceiling: a reply address is due when the case's last activity is at
+	// or before this, whatever the desk reports.
+	Ceiling time.Time
+}
+
+// BodyDue reports whether c's body is due to be cleared.
+func (r ClearRule) BodyDue(c Case) bool {
+	return !c.DeliveredAt.IsZero() && c.BodyClearedAt.IsZero() && !c.DeliveredAt.After(r.Body)
+}
+
+// ReplyToDue reports whether c's reply address is due to be cleared.
+func (r ClearRule) ReplyToDue(c Case) bool {
+	if c.DeliveredAt.IsZero() || !c.ReplyToClearedAt.IsZero() {
+		return false
+	}
+	last := c.LastActivity()
+	if !last.After(r.Ceiling) {
+		return true
+	}
+	open := c.Status == StatusOpen || c.Status == StatusPending
+	return !open && !last.After(r.ReplyTo)
+}
+
+// Due reports whether anything of c is due to be cleared.
+func (r ClearRule) Due(c Case) bool {
+	return r.BodyDue(c) || r.ReplyToDue(c)
+}
+
+// LastActivity is the latest of delivery, the last reply sent through
+// supportforge and closure.
+func (c Case) LastActivity() time.Time {
+	out := c.DeliveredAt
+	for _, t := range []time.Time{c.LastReplyAt, c.ClosedAt} {
+		if t.After(out) {
+			out = t
+		}
+	}
+	return out
 }

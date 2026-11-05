@@ -83,6 +83,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{SupportforgeCasesColumns[15], SupportforgeCasesColumns[14], SupportforgeCasesColumns[21]},
 			},
+			{
+				Name:    "supportcase_delivered_at",
+				Unique:  false,
+				Columns: []*schema.Column{SupportforgeCasesColumns[18]},
+			},
 		},
 	}
 	// Tables holds all the tables in the schema.

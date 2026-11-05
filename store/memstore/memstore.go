@@ -213,6 +213,25 @@ func (s *Store) StatusDue(ctx context.Context, desks []string, limit int) ([]sto
 	return page(out, store.Page{Limit: limit}), nil
 }
 
+// ClearDue implements [store.Store].
+func (s *Store) ClearDue(ctx context.Context, r store.ClearRule, p store.Page) ([]store.Case, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []store.Case
+	for _, c := range s.cases {
+		if r.Due(*c) {
+			out = append(out, *c)
+		}
+	}
+	slices.SortFunc(out, func(a, b store.Case) int {
+		return cmp.Or(a.DeliveredAt.Compare(b.DeliveredAt), cmp.Compare(a.ID, b.ID))
+	})
+	return page(out, p), nil
+}
+
 func page(cs []store.Case, p store.Page) []store.Case {
 	limit := p.Limit
 	if limit <= 0 {

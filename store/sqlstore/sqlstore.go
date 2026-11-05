@@ -33,6 +33,7 @@ import (
 	"github.com/plexusone/supportforge/store"
 	"github.com/plexusone/supportforge/store/sqlstore/internal/ent"
 	"github.com/plexusone/supportforge/store/sqlstore/internal/ent/outboxentry"
+	"github.com/plexusone/supportforge/store/sqlstore/internal/ent/predicate"
 	"github.com/plexusone/supportforge/store/sqlstore/internal/ent/supportcase"
 )
 
@@ -354,6 +355,51 @@ func (s *Store) StatusDue(ctx context.Context, desks []string, limit int) ([]sto
 		return nil, fmt.Errorf("sqlstore: status due: %w", err)
 	}
 	return toCases(rows), nil
+}
+
+// ClearDue implements [store.Store]. It applies [store.ClearRule] in SQL.
+func (s *Store) ClearDue(ctx context.Context, r store.ClearRule, p store.Page) ([]store.Case, error) {
+	limit := p.Limit
+	if limit <= 0 {
+		limit = defaultLimit
+	}
+	open := []string{string(store.StatusOpen), string(store.StatusPending)}
+	rows, err := s.client.SupportCase.Query().
+		Where(
+			supportcase.DeliveredAtNotNil(),
+			supportcase.Or(
+				supportcase.And(
+					supportcase.BodyClearedAtIsNil(),
+					supportcase.DeliveredAtLTE(r.Body.UTC()),
+				),
+				supportcase.And(
+					supportcase.ReplyToClearedAtIsNil(),
+					supportcase.Or(
+						quietSince(r.Ceiling),
+						supportcase.And(supportcase.StatusNotIn(open...), quietSince(r.ReplyTo)),
+					),
+				),
+			),
+		).
+		Order(supportcase.ByDeliveredAt(), supportcase.ByID()).
+		Offset(max(p.Offset, 0)).
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("sqlstore: clear due: %w", err)
+	}
+	return toCases(rows), nil
+}
+
+// quietSince matches a delivered case whose last activity is at or before
+// t: [store.Case.LastActivity] in SQL.
+func quietSince(t time.Time) predicate.SupportCase {
+	t = t.UTC()
+	return supportcase.And(
+		supportcase.DeliveredAtLTE(t),
+		supportcase.Or(supportcase.LastReplyAtIsNil(), supportcase.LastReplyAtLTE(t)),
+		supportcase.Or(supportcase.ClosedAtIsNil(), supportcase.ClosedAtLTE(t)),
+	)
 }
 
 // inTx runs fn in a transaction, committing if it returns nil.
