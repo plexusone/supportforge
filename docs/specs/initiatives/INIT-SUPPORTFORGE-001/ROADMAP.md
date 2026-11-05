@@ -65,7 +65,7 @@ submitting from a knowledge module, an agent console, and a live channel.
 
 **Theme:** Both modules are documented, tested against PostgreSQL, and tagged.
 
-- [ ] `RMI-SUPPORTFORGE-015` Ent `sqlstore` with `supportforge_` tables, passing the store conformance suite on PostgreSQL in CI
+- [x] `RMI-SUPPORTFORGE-015` Ent `sqlstore` with `supportforge_` tables, passing the store conformance suite on PostgreSQL in CI
   - Depends on: `RMI-SUPPORTFORGE-006`, `RMI-SUPPORTFORGE-010`
 - [ ] `RMI-SUPPORTFORGE-016` Docs site, README and an example host
   - Depends on: `RMI-SUPPORTFORGE-009`, `RMI-SUPPORTFORGE-012`
