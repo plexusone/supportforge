@@ -5,8 +5,9 @@ signed-in user or a visitor, store it before anything is sent, and deliver it
 to a help desk or a mailbox, with personal-data rules built in.
 
 > **Status:** in development. Intake, the in-memory and SQL stores, delivery
-> with retries across desks, acknowledgments, the mail desk and the
-> requester's list are built; data governance comes next. See
+> with retries across desks, acknowledgments, the mail desk, the
+> requester's list, field classification and the clear job are built;
+> export and erasure come next. See
 > the [specifications](docs/specs/initiatives/INIT-SUPPORTFORGE-001/PRD.md).
 
 ## What it does
@@ -82,6 +83,26 @@ cat, err := datacatalog.Merge(hostCatalog, sqlstore.Catalog())
 
 A test compares the catalog with the columns the store creates, so a column
 cannot ship unclassified.
+
+## Clearing personal data
+
+`Service.Clear` removes what is no longer needed from delivered cases:
+
+- the body, seven days after delivery;
+- the reply address, seven days after the last activity (delivery, the last
+  reply or closure), unless the desk reports the ticket open or pending;
+- the reply address, after 90 days without activity, whatever the desk
+  reports.
+
+The title stays for the requester's list, and undelivered cases are never
+cleared. `Config.ClearDelay` and `Config.MaxHold` change the periods, and a
+`HoldChecker` keeps a held requester's cases. Run it on a schedule, such as
+hourly: it is safe to run from several processes, and a run after downtime
+catches up.
+
+```go
+report, err := svc.Clear(ctx)
+```
 
 ## License
 
